@@ -1,0 +1,52 @@
+{% extends "base.html" %} {% block title %}Boldfit - Supply Chain Intelligence{%
+endblock %} {% block content %}
+<div class="text-center py-5">
+  <img
+    src="{{ url_for('static', filename='images/logo.jpg') }}"
+    alt="Boldfit Logo"
+    style="width: 180px; margin-bottom: 25px"
+  />
+  <h1 class="display-4 mb-4">
+    <span style="color: var(--boldfit-yellow)">BOLDFIT</span> Supply Chain
+    Intelligence
+  </h1>
+  <p class="lead text-muted mb-5">
+    AI-Powered Inventory & Demand Management System
+  </p>
+
+  <div class="row g-4 justify-content-center">
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-body text-center">
+          <i class="bi bi-graph-up-arrow display-4 text-primary mb-3"></i>
+          <h5>Demand Forecasting</h5>
+          <p class="text-muted">Predict orders for next 7 days using ML</p>
+          <a href="/forecast" class="btn btn-primary">Forecast Now</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-body text-center">
+          <i class="bi bi-exclamation-triangle display-4 text-danger mb-3"></i>
+          <h5>Stockout Alerts</h5>
+          <p class="text-muted">Real-time risk monitoring</p>
+          <a href="/forecast/stockout-alerts" class="btn btn-primary"
+            >View Alerts</a
+          >
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-body text-center">
+          <i class="bi bi-robot display-4 text-success mb-3"></i>
+          <h5>AI Assistant</h5>
+          <p class="text-muted">Ask anything about your supply chain</p>
+          <a href="/assistant" class="btn btn-primary">Chat Now</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

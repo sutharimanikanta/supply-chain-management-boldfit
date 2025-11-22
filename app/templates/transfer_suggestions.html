@@ -1,0 +1,294 @@
+<!-- ============================================================================
+     FILE: app/templates/transfer_suggestions.html
+
+     Replace your entire transfer_suggestions.html with this file
+     ============================================================================ -->
+<!-- ==========================================================================
+     FILE: app/templates/transfer_suggestions.html
+
+     Replace your entire transfer_suggestions.html with this file
+     ========================================================================== -->
+{% extends "base.html" %} {% block title %}Transfer Suggestions - Boldfit{%
+endblock %} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2><i class="bi bi-lightbulb"></i> Automated Transfer Suggestions</h2>
+  <a href="/transfers" class="btn btn-secondary">
+    <i class="bi bi-arrow-left"></i> Back to Transfers
+  </a>
+</div>
+
+<div class="alert alert-info">
+  <i class="bi bi-info-circle"></i>
+  These suggestions are generated based on demand forecasts and inventory
+  levels.
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Priority</th>
+            <th>SKU</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Quantity</th>
+            <th>Reason</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="suggestions-table">
+          {% for s in suggestions %}
+          <tr id="row-{{ loop.index }}">
+            <td>
+              {% if s.priority == 'high' %}
+              <span class="badge bg-danger">HIGH</span>
+              {% else %}
+              <span class="badge bg-warning text-dark">MEDIUM</span>
+              {% endif %}
+            </td>
+            <td><strong>{{ s.sku_name }}</strong></td>
+            <td>{{ s.from_warehouse_name }}</td>
+            <td>{{ s.to_warehouse_name }}</td>
+            <td>{{ s.quantity }}</td>
+            <td><small>{{ s.reason }}</small></td>
+            <td>
+              <button
+                type="button"
+                class="btn btn-sm btn-primary execute-btn"
+                id="btn-{{ loop.index }}"
+                data-from-warehouse-id="{{ s.from_warehouse_id }}"
+                data-to-warehouse-id="{{ s.to_warehouse_id }}"
+                data-sku-id="{{ s.sku_id }}"
+                data-quantity="{{ s.quantity }}"
+                data-reason="{{ s.reason }}"
+                data-sku-name="{{ s.sku_name }}"
+                data-row-id="row-{{ loop.index }}"
+              >
+                Execute
+              </button>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="7" class="text-center text-muted">
+              <i class="bi bi-check-circle"></i>
+              No transfer suggestions at this time. Inventory is well balanced!
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title text-success">
+          <i class="bi bi-check-circle-fill"></i> Transfer Successful
+        </h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p id="success-message">Transfer completed successfully!</p>
+        <div
+          id="transfer-details"
+          class="mt-3 p-3 bg-secondary rounded"
+          style="display: none"
+        >
+          <small>
+            <strong>New Source Qty:</strong> <span id="new-source-qty">-</span
+            ><br />
+            <strong>New Destination Qty:</strong>
+            <span id="new-dest-qty">-</span>
+          </small>
+        </div>
+      </div>
+      <div class="modal-footer border-secondary">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Close
+        </button>
+        <a href="/inventory" class="btn btn-primary">
+          <i class="bi bi-boxes"></i> View Inventory
+        </a>
+        <a href="/transfers" class="btn btn-outline-warning">
+          <i class="bi bi-truck"></i> View Transfers
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Error Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title text-danger">
+          <i class="bi bi-exclamation-triangle-fill"></i> Transfer Failed
+        </h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p id="error-message">An error occurred.</p>
+      </div>
+      <div class="modal-footer border-secondary">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Get all execute buttons
+    const executeButtons = document.querySelectorAll(".execute-btn");
+
+    console.log("Found " + executeButtons.length + " execute buttons");
+
+    // Add click handler to each button
+    executeButtons.forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Get data from button's data attributes
+        const fromWarehouseId = this.getAttribute("data-from-warehouse-id");
+        const toWarehouseId = this.getAttribute("data-to-warehouse-id");
+        const skuId = this.getAttribute("data-sku-id");
+        const quantity = this.getAttribute("data-quantity");
+        const reason = this.getAttribute("data-reason");
+        const skuName = this.getAttribute("data-sku-name");
+        const rowId = this.getAttribute("data-row-id");
+
+        console.log("Execute clicked for:", skuName);
+        console.log("Data:", {
+          fromWarehouseId,
+          toWarehouseId,
+          skuId,
+          quantity,
+        });
+
+        // Confirm before executing
+        const confirmMsg = `Transfer ${quantity} units of ${skuName}?`;
+        if (!confirm(confirmMsg)) {
+          console.log("Transfer cancelled by user");
+          return;
+        }
+
+        // Save reference to button
+        const button = this;
+
+        // Disable button and show loading state
+        button.disabled = true;
+        button.innerHTML =
+          '<span class="spinner-border spinner-border-sm" role="status"></span> Processing...';
+
+        // Prepare request data
+        const requestData = {
+          from_warehouse_id: parseInt(fromWarehouseId),
+          to_warehouse_id: parseInt(toWarehouseId),
+          sku_id: parseInt(skuId),
+          quantity: parseInt(quantity),
+          reason: reason || "Automated rebalancing",
+        };
+
+        console.log("Sending request:", requestData);
+
+        // Make the API call
+        fetch("/transfers/execute-suggestion", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify(requestData),
+        })
+          .then(function (response) {
+            console.log("Response status:", response.status);
+            return response.json();
+          })
+          .then(function (data) {
+            console.log("Response data:", data);
+
+            if (data.status === "success") {
+              // SUCCESS - Update button appearance
+              button.innerHTML = '<i class="bi bi-check-lg"></i> Done';
+              button.classList.remove("btn-primary");
+              button.classList.add("btn-success");
+              button.disabled = true;
+
+              // Fade out the row
+              const row = document.getElementById(rowId);
+              if (row) {
+                row.style.opacity = "0.5";
+                row.style.backgroundColor = "rgba(40, 167, 69, 0.1)";
+              }
+
+              // Update and show success modal
+              document.getElementById("success-message").textContent =
+                data.message;
+
+              if (data.details) {
+                document.getElementById("new-source-qty").textContent =
+                  data.details.new_source_quantity;
+                document.getElementById("new-dest-qty").textContent =
+                  data.details.new_destination_quantity;
+                document.getElementById("transfer-details").style.display =
+                  "block";
+              }
+
+              const successModal = new bootstrap.Modal(
+                document.getElementById("successModal")
+              );
+              successModal.show();
+            } else {
+              // ERROR - Reset button and show error
+              button.disabled = false;
+              button.innerHTML = "Execute";
+
+              document.getElementById("error-message").textContent =
+                data.message || "Unknown error occurred";
+              const errorModal = new bootstrap.Modal(
+                document.getElementById("errorModal")
+              );
+              errorModal.show();
+            }
+          })
+          .catch(function (error) {
+            console.error("Fetch error:", error);
+
+            // Reset button
+            button.disabled = false;
+            button.innerHTML = "Execute";
+
+            // Show error modal
+            document.getElementById("error-message").textContent =
+              "Network error: " + error.message;
+            const errorModal = new bootstrap.Modal(
+              document.getElementById("errorModal")
+            );
+            errorModal.show();
+          });
+      });
+    });
+  });
+</script>
+{% endblock %}

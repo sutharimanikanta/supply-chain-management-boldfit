@@ -1,0 +1,56 @@
+{% extends "base.html" %} {% block title %}Stockout Alerts - Boldfit{% endblock
+%} {% block content %}
+<h2 class="mb-4">
+  <i class="bi bi-exclamation-triangle text-danger"></i> Stockout Risk Alerts
+</h2>
+
+<div class="card">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Risk</th>
+            <th>SKU</th>
+            <th>Warehouse</th>
+            <th>Current Stock</th>
+            <th>Daily Forecast</th>
+            <th>Days Until Stockout</th>
+            <th>Stockout Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for alert in alerts %}
+          <tr>
+            <td>
+              {% if alert.risk_level == 'high' %}
+              <span class="badge bg-danger">HIGH</span>
+              {% elif alert.risk_level == 'medium' %}
+              <span class="badge bg-warning text-dark">MEDIUM</span>
+              {% else %}
+              <span class="badge bg-success">SAFE</span>
+              {% endif %}
+            </td>
+            <td>
+              <strong>{{ alert.sku_name }}</strong><br />
+              <small class="text-muted">{{ alert.sku_code }}</small>
+            </td>
+            <td>{{ alert.warehouse_name }}</td>
+            <td>{{ alert.current_stock }}</td>
+            <td>{{ alert.daily_forecast }}</td>
+            <td>{{ alert.days_until_stockout }}</td>
+            <td>{{ alert.stockout_date or 'N/A' }}</td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="7" class="text-center text-muted">
+              No alerts at this time
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

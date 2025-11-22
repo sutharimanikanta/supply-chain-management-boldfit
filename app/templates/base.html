@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Boldfit Supply Chain{% endblock %}</title>
+
+    <!-- Bootstrap & Icons -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+
+    <!-- =======================================================================
+         BASE.CSS (Boldfit Custom Theme)
+    ======================================================================== -->
+    <style>
+      :root {
+        --bs-body-color: #ffffff !important;
+        --bs-body-bg: #1a1a1a !important;
+
+        --boldfit-black: #1a1a1a;
+        --boldfit-yellow: #ffd700;
+        --boldfit-yellow-dark: #e6c200;
+        --boldfit-gray: #2d2d2d;
+        --boldfit-light-gray: #3c3c3c;
+
+        --boldfit-text: #eaeaea;
+        --boldfit-heading: #ffffff;
+      }
+
+      body {
+        background: var(--boldfit-black) !important;
+        color: var(--boldfit-text) !important;
+        font-family: "Segoe UI", system-ui, sans-serif;
+      }
+
+      .text-muted {
+        color: #aaaaaa !important;
+      }
+
+      /* Sidebar */
+      .sidebar {
+        background: var(--boldfit-gray);
+        min-height: 100vh;
+        padding: 20px 0;
+      }
+
+      .sidebar .nav-link {
+        color: #cccccc !important;
+        padding: 12px 20px;
+        border-left: 3px solid transparent;
+        transition: 0.3s;
+      }
+
+      .sidebar .nav-link:hover,
+      .sidebar .nav-link.active {
+        background: rgba(255, 215, 0, 0.12);
+        color: var(--boldfit-yellow) !important;
+        border-left-color: var(--boldfit-yellow);
+      }
+
+      .sidebar .nav-link i {
+        margin-right: 10px;
+      }
+
+      /* Logo */
+      .logo {
+        padding: 20px;
+        text-align: center;
+        border-bottom: 1px solid #444;
+        margin-bottom: 20px;
+      }
+
+      .logo h4 {
+        color: var(--boldfit-yellow);
+        margin-bottom: 3px;
+      }
+
+      .logo small {
+        color: #888 !important;
+      }
+
+      /* Main content */
+      .main-content {
+        padding: 35px;
+      }
+
+      /* Cards */
+      .card {
+        background: var(--boldfit-gray);
+        border: none;
+        border-radius: 12px;
+        color: #fff;
+      }
+
+      .card-header {
+        background: transparent;
+        border-bottom: 1px solid #444;
+        color: var(--boldfit-yellow);
+        font-weight: 600;
+      }
+
+      /* Buttons */
+      .btn-primary {
+        background: var(--boldfit-yellow);
+        border-color: var(--boldfit-yellow);
+        color: #000;
+        font-weight: 600;
+      }
+
+      .btn-primary:hover {
+        background: var(--boldfit-yellow-dark);
+        border-color: var(--boldfit-yellow-dark);
+      }
+
+      /* Forms */
+      .form-control,
+      .form-select {
+        background: #111 !important;
+        border-color: #444 !important;
+        color: #fff !important;
+      }
+
+      .form-control:focus {
+        border-color: var(--boldfit-yellow) !important;
+        box-shadow: 0 0 0 0.25rem rgba(255, 215, 0, 0.25) !important;
+      }
+
+      /* Tables */
+      .table {
+        color: #fff !important;
+      }
+
+      .table thead th {
+        color: var(--boldfit-yellow);
+        border-color: #444;
+      }
+
+      .table tbody tr:hover {
+        background: rgba(255, 215, 0, 0.05);
+      }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #444;
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--boldfit-yellow);
+      }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+  </head>
+
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 sidebar p-0">
+          <div class="logo">
+            <img
+              src="{{ url_for('static', filename='images/logo.jpg') }}"
+              alt="Boldfit Logo"
+              style="width: 60px; margin-bottom: 10px"
+            />
+            <h4>BOLDFIT</h4>
+            <small class="text-muted">Supply Chain AI</small>
+          </div>
+
+          <nav class="nav flex-column">
+            <a
+              class="nav-link {{ 'active' if request.endpoint == 'index' else '' }}"
+              href="/"
+            >
+              <i class="bi bi-house"></i> Home
+            </a>
+            <a
+              class="nav-link {{ 'active' if 'dashboard' in request.endpoint|default('') }}"
+              href="/dashboard"
+            >
+              <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+            <a
+              class="nav-link {{ 'active' if 'warehouse' in request.endpoint|default('') }}"
+              href="/warehouses"
+            >
+              <i class="bi bi-building"></i> Warehouses
+            </a>
+            <a
+              class="nav-link {{ 'active' if 'sku' in request.endpoint|default('') }}"
+              href="/skus"
+            >
+              <i class="bi bi-box"></i> SKUs
+            </a>
+            <a
+              class="nav-link {{ 'active' if 'inventory' in request.endpoint|default('') }}"
+              href="/inventory"
+            >
+              <i class="bi bi-boxes"></i> Inventory
+            </a>
+
+            <hr class="bg-secondary mx-3" />
+
+            <a
+              class="nav-link {{ 'active' if 'forecast' in request.endpoint|default('') }}"
+              href="/forecast"
+            >
+              <i class="bi bi-graph-up"></i> Forecast
+            </a>
+            <a class="nav-link" href="/forecast/stockout-alerts">
+              <i class="bi bi-exclamation-triangle"></i> Stockout Alerts
+            </a>
+            <a class="nav-link" href="/forecast/reorder">
+              <i class="bi bi-cart-plus"></i> Reorder
+            </a>
+            <a
+              class="nav-link {{ 'active' if 'transfer' in request.endpoint|default('') }}"
+              href="/transfers"
+            >
+              <i class="bi bi-truck"></i> Transfers
+            </a>
+
+            <hr class="bg-secondary mx-3" />
+
+            <a
+              class="nav-link {{ 'active' if 'assistant' in request.endpoint|default('') }}"
+              href="/assistant"
+            >
+              <i class="bi bi-robot"></i> AI Assistant
+            </a>
+          </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10 main-content">
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %} {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show">
+            {{ message }}
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+            ></button>
+          </div>
+          {% endfor %} {% endif %} {% endwith %} {% block content %}{% endblock
+          %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+  {% block extra_js %}{% endblock %}
+</html>

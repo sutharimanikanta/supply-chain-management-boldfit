@@ -1,0 +1,174 @@
+{% extends "base.html" %} {% block title %}SKU Forecast - Boldfit{% endblock %}
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-graph-up"></i> SKU Demand Forecast</h2>
+
+<div class="row">
+  <div class="col-md-5">
+    <div class="card">
+      <div class="card-header">Forecast Parameters</div>
+      <div class="card-body">
+        <form id="forecast-form">
+          <div class="mb-3">
+            <label class="form-label">Warehouse</label>
+            <select class="form-select" name="warehouse_id" required>
+              <option value="">Select Warehouse</option>
+              {% for w in warehouses %}
+              <option value="{{ w.id }}">{{ w.name }} ({{ w.city }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">SKU</label>
+            <select class="form-select" name="sku_id" required>
+              <option value="">Select SKU</option>
+              {% for s in skus %}
+              <option value="{{ s.id }}">
+                {{ s.name }} ({{ s.sku_code }})
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Historical Demand (Optional)</label>
+            <input
+              type="text"
+              class="form-control"
+              name="historical_demand"
+              placeholder="e.g., 10,12,8,15,11,9,14"
+            />
+            <small class="text-muted"
+              >Comma-separated last 7-10 days orders</small
+            >
+          </div>
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-lightning"></i> Generate Forecast
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-7">
+    <div class="card" id="results-card" style="display: none">
+      <div class="card-header">Forecast Results</div>
+      <div class="card-body">
+        <div class="row g-3 mb-4">
+          <div class="col-4">
+            <div class="stat-card">
+              <div class="stat-value" id="tomorrow-forecast">-</div>
+              <div class="stat-label">Tomorrow's Forecast</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="stat-card">
+              <div class="stat-value" id="weekly-forecast">-</div>
+              <div class="stat-label">7-Day Forecast</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="stat-card">
+              <div class="stat-value" id="current-stock">-</div>
+              <div class="stat-label">Current Stock</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert" id="risk-alert">
+          <strong>Stockout Risk:</strong> <span id="risk-text">-</span>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="p-3 bg-dark rounded">
+              <small class="text-muted">Days Until Stockout</small>
+              <h4 id="days-stockout">-</h4>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="p-3 bg-dark rounded">
+              <small class="text-muted">Stockout Date</small>
+              <h4 id="stockout-date">-</h4>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="p-3 bg-dark rounded">
+              <small class="text-muted">Reorder Quantity</small>
+              <h4 id="reorder-qty" class="text-warning">-</h4>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="p-3 bg-dark rounded">
+              <small class="text-muted">Reorder Urgency</small>
+              <h4 id="reorder-urgency">-</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-3" id="loading-card" style="display: none">
+      <div class="card-body text-center py-5">
+        <div class="spinner-border text-warning" role="status"></div>
+        <p class="mt-3 text-muted">Generating forecast...</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  document
+    .getElementById("forecast-form")
+    .addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      document.getElementById("loading-card").style.display = "block";
+      document.getElementById("results-card").style.display = "none";
+
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+
+      fetch("/forecast/sku", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+        .then((r) => r.json())
+        .then((result) => {
+          document.getElementById("loading-card").style.display = "none";
+
+          if (result.status === "success") {
+            document.getElementById("results-card").style.display = "block";
+            document.getElementById("tomorrow-forecast").textContent =
+              result.tomorrow_forecast;
+            document.getElementById("weekly-forecast").textContent =
+              result.seven_day_forecast;
+            document.getElementById("current-stock").textContent =
+              result.current_stock;
+            document.getElementById("days-stockout").textContent =
+              result.days_until_stockout + " days";
+            document.getElementById("stockout-date").textContent =
+              result.stockout_date || "N/A";
+            document.getElementById("reorder-qty").textContent =
+              result.reorder_quantity + " units";
+            document.getElementById("reorder-urgency").textContent =
+              result.reorder_urgency.toUpperCase();
+
+            const riskAlert = document.getElementById("risk-alert");
+            const riskText = document.getElementById("risk-text");
+            riskText.textContent = result.risk_level.toUpperCase();
+
+            riskAlert.className = "alert";
+            if (result.risk_level === "high") {
+              riskAlert.classList.add("alert-danger");
+            } else if (result.risk_level === "medium") {
+              riskAlert.classList.add("alert-warning");
+            } else {
+              riskAlert.classList.add("alert-success");
+            }
+          } else {
+            alert("Error: " + result.message);
+          }
+        });
+    });
+</script>
+{% endblock %}

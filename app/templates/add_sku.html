@@ -1,0 +1,80 @@
+{% extends "base.html" %} {% block title %}Add SKU - Boldfit{% endblock %} {%
+block content %}
+<h2 class="mb-4"><i class="bi bi-box"></i> Add New SKU</h2>
+
+<div class="card" style="max-width: 600px">
+  <div class="card-body">
+    <form method="POST">
+      <div class="mb-3">
+        <label class="form-label">SKU Code</label>
+        <input
+          type="text"
+          class="form-control"
+          name="sku_code"
+          required
+          placeholder="e.g., WHEY-1KG-CHOC"
+        />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Product Name</label>
+        <input
+          type="text"
+          class="form-control"
+          name="name"
+          required
+          placeholder="e.g., Whey Protein 1kg Chocolate"
+        />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Category</label>
+        <input
+          type="text"
+          class="form-control"
+          name="category"
+          placeholder="e.g., Supplements"
+        />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Description</label>
+        <textarea class="form-control" name="description" rows="2"></textarea>
+      </div>
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label class="form-label">Unit Price (₹)</label>
+          <input
+            type="number"
+            class="form-control"
+            name="unit_price"
+            step="0.01"
+            value="0"
+          />
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">Lead Time (Days)</label>
+          <input
+            type="number"
+            class="form-control"
+            name="reorder_lead_days"
+            value="3"
+          />
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">Min Stock Level</label>
+          <input
+            type="number"
+            class="form-control"
+            name="min_stock_level"
+            value="10"
+          />
+        </div>
+      </div>
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-check"></i> Save SKU
+        </button>
+        <a href="/skus" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

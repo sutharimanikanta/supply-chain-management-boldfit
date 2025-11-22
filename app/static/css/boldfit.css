@@ -1,0 +1,58 @@
+/* Custom Boldfit Styles - Add any additional custom CSS here */
+
+:root {
+    --boldfit-black: #0E0E0E;
+    --boldfit-yellow: #F2C94C;
+    --boldfit-yellow-dark: #C9A53A;
+    --boldfit-gray: #1A1A1A;
+    --boldfit-light-gray: #262626;
+}
+
+/* Fix Bootstrap body text color */
+:root {
+    --bs-body-color: #eaeaea !important;
+    /* Light gray/white */
+    --bs-body-color-rgb: 234, 234, 234 !important;
+}
+
+/* Fix Bootstrap text-muted override */
+.text-muted {
+    --bs-text-opacity: 1 !important;
+    color: rgba(180, 180, 180, 0.75) !important;
+    /* Proper muted gray */
+}
+
+/* Animation for loading states */
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.loading {
+    animation: pulse 1.5s infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--boldfit-black);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--boldfit-gray);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--boldfit-yellow);
+}

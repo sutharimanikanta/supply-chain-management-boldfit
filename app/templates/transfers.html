@@ -1,0 +1,162 @@
+{% extends "base.html" %} {% block title %}Inventory Transfers - Boldfit{%
+endblock %} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2><i class="bi bi-truck"></i> Inventory Transfers</h2>
+  <div>
+    <a href="/transfers/suggestions" class="btn btn-outline-warning me-2">
+      <i class="bi bi-lightbulb"></i> View Suggestions
+    </a>
+    <button
+      class="btn btn-primary"
+      data-bs-toggle="modal"
+      data-bs-target="#addTransferModal"
+    >
+      <i class="bi bi-plus"></i> New Transfer
+    </button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>SKU</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Quantity</th>
+            <th>Reason</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in transfers %}
+          <tr>
+            <td>{{ t.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>{{ t.sku.name }}</td>
+            <td>{{ t.from_warehouse.name }}</td>
+            <td>{{ t.to_warehouse.name }}</td>
+            <td>{{ t.quantity }}</td>
+            <td>{{ t.reason or '-' }}</td>
+            <td>
+              {% if t.status == 'completed' %}
+              <span class="badge bg-success">Completed</span>
+              {% elif t.status == 'in_transit' %}
+              <span class="badge bg-warning text-dark">In Transit</span>
+              {% else %}
+              <span class="badge bg-secondary">Pending</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="7" class="text-center text-muted">
+              No transfers recorded
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add Transfer Modal -->
+<div class="modal fade" id="addTransferModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title">New Transfer</h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <form id="transfer-form">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">From Warehouse</label>
+            <select class="form-select" name="from_warehouse_id" required>
+              {% for w in warehouses %}
+              <option value="{{ w.id }}">{{ w.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">To Warehouse</label>
+            <select class="form-select" name="to_warehouse_id" required>
+              {% for w in warehouses %}
+              <option value="{{ w.id }}">{{ w.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">SKU</label>
+            <select class="form-select" name="sku_id" required>
+              {% for s in skus %}
+              <option value="{{ s.id }}">{{ s.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Quantity</label>
+            <input
+              type="number"
+              class="form-control"
+              name="quantity"
+              required
+              min="1"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Reason</label>
+            <input
+              type="text"
+              class="form-control"
+              name="reason"
+              placeholder="Optional"
+            />
+          </div>
+        </div>
+        <div class="modal-footer border-secondary">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary">Create Transfer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  document
+    .getElementById("transfer-form")
+    .addEventListener("submit", function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+
+      fetch("/transfers/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+        .then((r) => r.json())
+        .then((result) => {
+          if (result.status === "success") {
+            location.reload();
+          } else {
+            alert("Error: " + result.message);
+          }
+        });
+    });
+</script>
+{% endblock %}

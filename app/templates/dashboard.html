@@ -1,0 +1,138 @@
+{% extends "base.html" %} {% block title %}Founder Dashboard - Boldfit{%
+endblock %} {% block content %}
+<h2 class="mb-4"><i class="bi bi-speedometer2"></i> Founder Dashboard</h2>
+
+<div class="row g-4 mb-4" id="stats-row">
+  <div class="col-md-3">
+    <div class="stat-card">
+      <div class="stat-value" id="total-inventory">-</div>
+      <div class="stat-label">Total Units in Stock</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card">
+      <div class="stat-value" id="stock-value">₹-</div>
+      <div class="stat-label">Stock Value</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card">
+      <div class="stat-value" id="total-skus">-</div>
+      <div class="stat-label">Active SKUs</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card">
+      <div class="stat-value" id="reorder-budget">₹-</div>
+      <div class="stat-label">Reorder Budget Needed</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <i class="bi bi-fire"></i> Top 5 SKUs by Demand
+      </div>
+      <div class="card-body">
+        <ul class="list-group list-group-flush" id="top-demand">
+          <li class="list-group-item bg-transparent text-muted">Loading...</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <i class="bi bi-exclamation-triangle text-danger"></i> Top 5 At Risk
+      </div>
+      <div class="card-body">
+        <ul class="list-group list-group-flush" id="at-risk">
+          <li class="list-group-item bg-transparent text-muted">Loading...</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mt-2">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <i class="bi bi-building"></i> Warehouse Summary
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Warehouse</th>
+                <th>City</th>
+                <th>Total Units</th>
+              </tr>
+            </thead>
+            <tbody id="warehouse-summary">
+              <tr>
+                <td colspan="3" class="text-muted">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    fetch("/dashboard/api/metrics")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.status === "success") {
+          document.getElementById("total-inventory").textContent =
+            data.total_inventory.toLocaleString();
+          document.getElementById("stock-value").textContent =
+            "₹" + data.stock_value.toLocaleString();
+          document.getElementById("total-skus").textContent = data.total_skus;
+          document.getElementById("reorder-budget").textContent =
+            "₹" + data.reorder_budget.toLocaleString();
+
+          // Top demand
+          let topHtml = "";
+          data.top_demand.forEach((item) => {
+            topHtml += `<li class="list-group-item bg-transparent d-flex justify-content-between">
+                        <span>${item.name}</span>
+                        <span class="badge bg-primary">${item.total_orders} orders</span>
+                    </li>`;
+          });
+          document.getElementById("top-demand").innerHTML =
+            topHtml ||
+            '<li class="list-group-item bg-transparent text-muted">No data</li>';
+
+          // At risk
+          let riskHtml = "";
+          data.at_risk.forEach((item) => {
+            const badgeClass =
+              item.risk_level === "high" ? "bg-danger" : "bg-warning text-dark";
+            riskHtml += `<li class="list-group-item bg-transparent d-flex justify-content-between">
+                        <span>${item.sku_name} @ ${item.warehouse_name}</span>
+                        <span class="badge ${badgeClass}">${item.days_until_stockout} days</span>
+                    </li>`;
+          });
+          document.getElementById("at-risk").innerHTML =
+            riskHtml ||
+            '<li class="list-group-item bg-transparent text-muted">No risks</li>';
+
+          // Warehouse summary
+          let whHtml = "";
+          data.warehouse_summary.forEach((w) => {
+            whHtml += `<tr><td>${w.name}</td><td>${w.city}</td><td>${w.total_units}</td></tr>`;
+          });
+          document.getElementById("warehouse-summary").innerHTML =
+            whHtml || '<tr><td colspan="3">No data</td></tr>';
+        }
+      });
+  });
+</script>
+{% endblock %}
