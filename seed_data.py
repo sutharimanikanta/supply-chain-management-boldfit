@@ -1,11 +1,11 @@
 ################################################################################
-# FILE: seed_demo_data.py
+# FILE: seed_data.py
 #
 # This script ADDS data to your existing Warehouses
-# Run: python seed_demo_data.py
+# Run: python seed_data.py
 ################################################################################
 
-from app import create_app, db
+from app import db
 from app.models.warehouse import Warehouse
 from app.models.sku import SKU
 from app.models.inventory import Inventory
@@ -13,10 +13,10 @@ from app.models.order_history import OrderHistory
 from datetime import datetime, timedelta
 import random
 
-app = create_app()
+# app = create_app()
 
 
-def seed_demo_data():
+def seed_demo_data(app):
     with app.app_context():
         # =====================================================================
         # STEP 1: Check existing Warehouses

@@ -23,8 +23,9 @@ def create_app():
     from app.routes.assistant_routes import assistant_bp
     from app.routes.dashboard_routes import dashboard_bp
     from app.routes.seed_routes import seed_bp
-
     app.register_blueprint(seed_bp, url_prefix="/seed")
+
+    # app.register_blueprint(seed_bp, url_prefix="/seed")
 
     # app.register_blueprint(seed_bp)
 
