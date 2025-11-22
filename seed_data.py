@@ -251,4 +251,7 @@ def seed_demo_data(app):
 
 
 if __name__ == "__main__":
-    seed_demo_data()
+    from app import create_app
+
+    app = create_app()
+    seed_demo_data(app)

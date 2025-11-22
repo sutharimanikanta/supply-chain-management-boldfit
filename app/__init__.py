@@ -42,7 +42,5 @@ def create_app():
         return render_template("index.html")
 
     # Create tables
-    with app.app_context():
-        db.create_all()
 
     return app
